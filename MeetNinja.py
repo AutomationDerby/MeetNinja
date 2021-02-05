@@ -6,20 +6,16 @@ from selenium.webdriver.common.by import By as by
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import pause; import os; import re
-import time; from datetime import datetime
+import time; from datetime import datetime, timedelta
 import colorama; from termcolor import colored
+import os, json
+from art import *
 
 colorama.init()
 
 ###################################################################
 #                        Meets                  HH:MM:SS DD/MM/YYYY
-MEETS = {"1 https://meet.google.com/meetURL1": "23:59:59 31/12/2020",
-         "2 https://meet.google.com/meetURL2": "23:59:59 31/12/2020",
-         "3 https://meet.google.com/meetURL3": "23:59:59 31/12/2020",
-         "4 https://meet.google.com/meetURL4": "23:59:59 31/12/2020",
-         # Add more Meet URLs (if any) using the same format as above
-         }
-
+MEETS = json.loads(open("timings.json", "r").read())
 DURATION = 60 # Duration of each Meet in minutes
 USERNAME = "emailaddress@gmail.com"
 PASSWORD = "passw0rd"
@@ -157,7 +153,7 @@ def login():
 
 def attendMeet():
     print(f"\n\nNavigating to Google Meet #{meetIndex}...", end="")
-    driver.get(URL[2:])
+    driver.get(meetingInfo[0])
     print(colored(" Success!", "green"))
     print(f"Entering Google Meet #{meetIndex}...", end="")
 
@@ -238,18 +234,27 @@ if __name__ == "__main__":
         driver = initBrowser()
         wait = webdriver.support.ui.WebDriverWait(driver, 7)
         action = ActionChains(driver)
-        for meetIndex, (URL, rawTime) in enumerate(MEETS.items(), start=1):
-            startTime = fixTimeFormat(rawTime)
+        for meetIndex, (jsonTime, meetingInfo) in enumerate(MEETS.items(), start=1):
+            startTime = datetime.strptime(jsonTime, "%Y-%m-%dT%H:%M:%S.%fZ")
             if (meetIndex <= 1):
-                print(colored(f"Waiting until first Meet start time [{rawTime}]...", "yellow"), end="")
+                print(colored(f"Waiting until first Meet start time [{jsonTime}]...", "yellow"), end="")
             else:
-                print(colored(f"\n\nWaiting until next Meet start time [{rawTime}]...", "yellow"), end="")
-            pause.until(datetime(*startTime))
+                print(colored(f"\n\nWaiting until next Meet start time [{jsonTime}]...", "yellow"), end="")
+            utc_offset = datetime.fromtimestamp(10000) - datetime.utcfromtimestamp(10000)
+            startTime = startTime + utc_offset
+            endTime = startTime + timedelta(minutes=meetingInfo[1])
+            if(datetime.now() - startTime < timedelta(seconds=0)):
+                  pause.until(startTime)
+            elif(datetime.now() - startTime >= timedelta(seconds=0) and endTime - datetime.now() > timedelta(seconds=0)):
+                  (1+1==2) # And that's a fact
+            elif(datetime.now() - endTime >= timedelta(seconds=0)):
+                  print(colored(" Past time.","red"))
+                  continue
             print(colored(" Started!", "green"))
             if (meetIndex <= 1):
                 login()
             attendMeet()
-            time.sleep(DURATION)
+            time.sleep(meetingInfo[1]*60)
             endMeet()
         print("\n\nAll Meets completed successfully.")
         # hibernate()
