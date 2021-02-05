@@ -186,8 +186,8 @@ def login():
                   field.send_keys(clickInfo[0])
                elif(clickInfo[2] == "googleLogin" and divName == "googleLogin"):
                   field.click()
-           except Exception as e:
-            (1+1==3) # placeholder
+            except Exception as e:
+                  (1+1==3) # placeholder
     print(colored(" Success!", "green"))
 
 
@@ -270,7 +270,6 @@ if __name__ == "__main__":
     versionCheck()
 
     try:
-        DURATION *= 60
         driver = initBrowser()
         wait = webdriver.support.ui.WebDriverWait(driver, 7)
         action = ActionChains(driver)
