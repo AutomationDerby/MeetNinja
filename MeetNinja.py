@@ -310,7 +310,7 @@ if __name__ == "__main__":
         input()
         print("\nCleaning up and exiting...", end="")
         driver.quit()
-    except:
-        # print(e)
+    except Exception as err:
+        # print(err)
         # Uncomment above to display error traceback (use when reporting issues)
         genericError()
