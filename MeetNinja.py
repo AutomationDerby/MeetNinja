@@ -13,12 +13,56 @@ from art import *
 
 colorama.init()
 
-###################################################################
-#                        Meets                  HH:MM:SS DD/MM/YYYY
+'''
+GOOGLE MEET JSON FILE:
+With 2 being the example duration
+{
+"1970-01-01T00:00:00.000Z one": [
+"https://meet.google.com/exampleLink1",
+2
+],
+"1970-01-01T00:00:00.000Z two": [
+"https://meet.google.com/exampleLink2",
+2
+]
+}
+LOGIN JSON FILE:
+{
+"accounts.google.com": {
+"#identifierId": [
+"example@example.com",
+3,
+"sendText"
+],
+"googleLogin": [
+"0",
+0,
+"googleLogin"
+]
+}, 
+"oauthWebsite": {
+"#studentId": [
+"SAMPLE_STUDENT_ID_IN_SAMPLE_FIELD",
+0,
+"sendText"
+], "#username": [
+"sample_username",
+0,
+"sendText"
+], "#password": [
+"password",
+0,
+"sendText"
+], "input[type="submit"]": [
+"0",
+0,
+"click"
+]
+}
+}
+'''
 MEETS = json.loads(open("timings.json", "r").read())
-DURATION = 60 # Duration of each Meet in minutes
-USERNAME = "emailaddress@gmail.com"
-PASSWORD = "passw0rd"
+LOGIN_INFO = json.loads(open("login.json", "r").read())
 BROWSER_DRIVER = "Browser Driver Path Goes Here (options below)"
 
 #                   Google Chrome
@@ -36,16 +80,12 @@ BROWSER_DRIVER = "Browser Driver Path Goes Here (options below)"
 ##################################################################
 
 # All required interactive elements' locators (text fields, buttons, etc.)
-usernameFieldPath = "identifierId"
-usernameNextButtonPath = "identifierNext"
-passwordFieldPath = "password"
-passwordNextButtonPath = "passwordNext"
 joinButton1Path = "//span[contains(text(), 'Join')]"
 joinButton2Path = "//span[contains(text(), 'Ask to join')]"
 endButtonPath = "[aria-label='Leave call']"
 
 currentVersionNumber = "v3.1.1"
-VERSION_CHECK_URL = "https://raw.githubusercontent.com/SHUR1K-N/MeetNinja-Google-Meet-Bot/master/versionfile.txt"
+VERSION_CHECK_URL = "https://raw.githubusercontent.com/AutomationDerby/MeetNinja/master/versionfile.txt"
 BANNER1 = colored('''
    ███▄ ▄███▓▓█████ ▓█████▄▄▄█████▓ ███▄    █  ██▓ ███▄    █  ▄▄▄██▀▀▀▄▄▄
   ▓██▒▀█▀ ██▒▓█   ▀ ▓█   ▀▓  ██▒ ▓▒ ██ ▀█   █ ▓██▒ ██ ▀█   █    ▒██  ▒████▄
@@ -82,7 +122,7 @@ def versionCheck():
         print(colored(" You are using the latest version!\n", "green"))
     elif currentVersionNumber < latestVersionNumber:
         print(colored(" You are using an older version of MeetNinja.", "red"))
-        print(colored("\nGet the latest version at https://github.com/SHUR1K-N/MeetNinja-Google-Meet-Bot", "yellow"))
+        print(colored("\nGet the latest version at https://github.com/AutomationDerby/MeetNinja", "yellow"))
         print(colored("Every new version comes with fixes, improvements, new features, etc..", "yellow"))
         print(colored("Please do not open an Issue if you see this message and have not yet tried the latest version.", "yellow"))
 
@@ -133,21 +173,21 @@ def initBrowser():
 def login():
     print("Logging into Google account...", end="")
     driver.get('https://accounts.google.com/signin')
-
-    usernameField = wait.until(when.element_to_be_clickable((by.ID, usernameFieldPath)))
-    time.sleep(1)
-    usernameField.send_keys(USERNAME)
-
-    usernameNextButton = wait.until(when.element_to_be_clickable((by.ID, usernameNextButtonPath)))
-    usernameNextButton.click()
-
-    passwordField = wait.until(when.element_to_be_clickable((by.NAME, passwordFieldPath)))
-    time.sleep(1)
-    passwordField.send_keys(PASSWORD)
-
-    passwordNextButton = wait.until(when.element_to_be_clickable((by.ID, passwordNextButtonPath)))
-    passwordNextButton.click()
-    time.sleep(3)
+    for indexNo, (comName, divInfo) in enumerate(LOGIN_INFO.items(), start=1):
+         while (not(driver.current_url.find(comName) != -1)):
+            (1+1==3) # placeholder
+         for indexNum, (divName, clickInfo) in enumerate(divInfo.items(), start=1):
+            try:
+               field = driver.find_element_by_css_selector(divName if divName != "googleLogin" else "[jsname=\"LgbsSe\"]")
+               time.sleep(clickInfo[1])
+               if(clickInfo[2] == "click"):
+                  field.click()
+               elif(clickInfo[2] == "sendText"):
+                  field.send_keys(clickInfo[0])
+               elif(clickInfo[2] == "googleLogin" and divName == "googleLogin"):
+                  field.click()
+           except Exception as e:
+            (1+1==3) # placeholder
     print(colored(" Success!", "green"))
 
 
@@ -235,7 +275,7 @@ if __name__ == "__main__":
         wait = webdriver.support.ui.WebDriverWait(driver, 7)
         action = ActionChains(driver)
         for meetIndex, (jsonTime, meetingInfo) in enumerate(MEETS.items(), start=1):
-            startTime = datetime.strptime(jsonTime, "%Y-%m-%dT%H:%M:%S.%fZ")
+            startTime = datetime.strptime(jsonTime[0:24], "%Y-%m-%dT%H:%M:%S.%fZ")
             if (meetIndex <= 1):
                 print(colored(f"Waiting until first Meet start time [{jsonTime}]...", "yellow"), end="")
             else:
