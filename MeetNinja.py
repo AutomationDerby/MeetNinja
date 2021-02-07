@@ -184,7 +184,7 @@ def login():
             (1+1==3) # placeholder
          for indexNum, (divName, clickInfo) in enumerate(divInfo.items(), start=1):
             try:
-               field = driver.find_element_by_css_selector(divName if divName != "googleLogin" else "[jsname=\"LgbsSe\"]")
+               field = wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, (divName if divName != "googleLogin" else "[jsname=\"LgbsSe\"]"))))
                time.sleep(clickInfo[1])
                if(clickInfo[2] == "click"):
                   field.click()
