@@ -87,16 +87,7 @@ endButtonPath = "[aria-label='Leave call']"
 
 currentVersionNumber = "v3.1.1"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/AutomationDerby/MeetNinja/master/versionfile.txt"
-BANNER1 = colored('''
-   ███▄ ▄███▓▓█████ ▓█████▄▄▄█████▓ ███▄    █  ██▓ ███▄    █  ▄▄▄██▀▀▀▄▄▄
-  ▓██▒▀█▀ ██▒▓█   ▀ ▓█   ▀▓  ██▒ ▓▒ ██ ▀█   █ ▓██▒ ██ ▀█   █    ▒██  ▒████▄
-  ▓██    ▓██░▒███   ▒███  ▒ ▓██░ ▒░▓██  ▀█ ██▒▒██▒▓██  ▀█ ██▒   ░██  ▒██  ▀█▄
-  ▒██    ▒██ ▒▓█  ▄ ▒▓█  ▄░ ▓██▓ ░ ▓██▒  ▐▌██▒░██░▓██▒  ▐▌██▒▓██▄██▓ ░██▄▄▄▄██
-  ▒██▒   ░██▒░▒████▒░▒████▒ ▒██▒ ░ ▒██░   ▓██░░██░▒██░   ▓██░ ▓███▒   ▓█   ▓██▒
-  ░ ▒░   ░  ░░░ ▒░ ░░░ ▒░ ░ ▒ ░░   ░ ▒░   ▒ ▒ ░▓  ░ ▒░   ▒ ▒  ▒▓▒▒░   ▒▒   ▓▒█░
-  ░  ░      ░ ░ ░  ░ ░ ░  ░   ░    ░ ░░   ░ ▒░ ▒ ░░ ░░   ░ ▒░ ▒ ░▒░    ▒   ▒▒ ░
-  ░      ░      ░      ░    ░         ░   ░ ░  ▒ ░   ░   ░ ░  ░ ░ ░    ░   ▒
-         ░      ░  ░   ░  ░                 ░  ░           ░  ░   ░        ░  ░''', 'blue')
+BANNER1 = colored(text2art("MEETNINJA"), 'blue')
 BANNER2 = colored('''                    ------------------------------------''', 'blue')
 BANNER3 = colored('''                    || MeetNinja: The Google Meet Bot ||''', 'red')
 BANNER4 = colored('''                    ------------------------------------''', 'blue')
