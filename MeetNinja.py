@@ -391,9 +391,7 @@ if __name__ == "__main__":
             if (meetNo <= 1):
                 login()
             attendMeet()
-            current_check = threading.Thread(target=leave_check)
             pause.until(endTime)
-            current_check = None
             endMeet()
             meetNo += 1
         print("\n\nAll Meets completed successfully.")
