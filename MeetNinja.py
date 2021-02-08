@@ -243,6 +243,7 @@ def leave_check():
             time.sleep(1)
             joinButton.click()
             during_meet = threading.Thread(target=duringMeet)
+            during_meet.start()
             continue
         except Exception as err:
             #print(err)
@@ -292,6 +293,8 @@ def attendMeet():
         joinButton.click()
         leave_checker = threading.Thread(target=leave_check)
         leave_checker.start()
+        during_meet = threading.Thread(target=duringMeet)
+        during_meet.start()
         break
 
     print(colored(" Success!", "green"))
