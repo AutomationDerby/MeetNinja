@@ -316,6 +316,9 @@ def attendMeet():
 def endMeet():
     try:
         during_meet = None
+    except Exception:
+        (1+1==3)
+    try:
         endButton = driver.find_element_by_css_selector(endButtonPath)
         endButton.click()
     except Exception:
