@@ -62,18 +62,9 @@ LOGIN JSON FILE:
 ]
 }
 }
-
-SPEECH JSON FILE:
-with alex being example name
-{
-    "['Alex', 'Alix', 'Alox']": [
-        "present sir"
-    ]
-}
 '''
 MEETS = json.loads(open("timings.json", "r").read())
 LOGIN_INFO = json.loads(open("login.json", "r").read())
-SPEECH_RESPONSES = json.loads(open("speech.json", "r").read())
 BROWSER_DRIVER = "ChromeDrivers/win32/chromedriver.exe"
 
 #                   Google Chrome
