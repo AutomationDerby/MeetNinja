@@ -225,7 +225,7 @@ def leave_check():
                 (1+1==3)
             time.sleep(1)
             driver.refresh()    
-        while (find_element_by_css_selector("body").get_attribute("innerHTML")('<div jsname="r4nke" class="CRFCdf">You left the meeting</div>') != -1):
+        while (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">You left the meeting</div>') != -1):
             try:
                 during_meet = None
             except Exception:
