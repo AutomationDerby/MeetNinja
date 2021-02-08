@@ -281,7 +281,6 @@ def attendMeet():
                 (1+1==3)
             time.sleep(1)
             driver.refresh()
-        print("Successful!")
         try:
             joinButton = wait.until(when.element_to_be_clickable((by.XPATH, joinButton1Path)))
         except:
