@@ -242,7 +242,7 @@ def leave_check():
             action.send_keys(Keys.ESCAPE).perform()
             time.sleep(1)
             joinButton.click()
-            during_meet = Thread(target=duringMeet)
+            during_meet = threading.Thread(target=duringMeet)
             continue
         except Exception as err:
             #print(err)
@@ -291,7 +291,7 @@ def attendMeet():
             action.send_keys(Keys.ESCAPE).perform()
         time.sleep(1)
         joinButton.click()
-        leave_checker = Thread(target=leave_check)
+        leave_checker = threading.Thread(target=leave_check)
         leave_checker.start()
         break
 
@@ -391,8 +391,9 @@ if __name__ == "__main__":
             if (meetNo <= 1):
                 login()
             attendMeet()
-            current_check = thread.start_new_thread(leave_check)
+            current_check = threading.Thread(target=leave_check)
             pause.until(endTime)
+            current_check = None
             endMeet()
             meetNo += 1
         print("\n\nAll Meets completed successfully.")
