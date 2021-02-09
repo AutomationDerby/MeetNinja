@@ -4,3 +4,6 @@ datetime 	# for scheduling & timestamps
 pause		# for scheduling
 colorama 	# for colors
 termcolor 	# for colors
+art # ascii art
+speechrecognition #for speech
+pyaudio #audio call name
