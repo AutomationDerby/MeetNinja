@@ -9,9 +9,12 @@ from selenium.webdriver.common.keys import Keys
 import pause; import os; import re
 import time; from datetime import datetime, timedelta
 import colorama; from termcolor import colored
-import os, json, threading
+import os, json, threading, random
 import urllib
 from art import *
+import speech_recognition as sr
+import wave, pyaudio
+import traceback
 
 colorama.init()
 
@@ -62,9 +65,18 @@ LOGIN JSON FILE:
 ]
 }
 }
+
+SPEECH JSON FILE:
+with alex being example name
+{
+    "['Alex', 'Alix', 'Alox']": [
+        "present sir"
+    ]
+}
 '''
 MEETS = json.loads(open("timings.json", "r").read())
 LOGIN_INFO = json.loads(open("login.json", "r").read())
+SPEECH_RESPONSES = json.loads(open("speech.json", "r").read())
 BROWSER_DRIVER = "ChromeDrivers/win32/chromedriver.exe"
 
 #                   Google Chrome
@@ -88,10 +100,10 @@ endButtonPath = "[aria-label='Leave call']"
 
 currentVersionNumber = "v3.1.1"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/AutomationDerby/MeetNinja/master/versionfile.txt"
-BANNER1 = colored(text2art("MEETNINJA"), 'blue')
-BANNER2 = colored('''                    ------------------------------------''', 'blue')
-BANNER3 = colored('''                    || MeetNinja: The Google Meet Bot ||''', 'red')
-BANNER4 = colored('''                    ------------------------------------''', 'blue')
+BANNER1 = colored(text2art("MEETHAX   V2"), 'blue')
+BANNER2 = colored('''                    ------------------------------------------''', 'blue')
+BANNER3 = colored('''                    ||    MeetHax V2: The Google Meet Bot   ||''', 'red')
+BANNER4 = colored('''                    ------------------------------------------''', 'blue')
 
 
 def printBanner():
@@ -184,7 +196,7 @@ def login():
             (1+1==3) # placeholder
          for indexNum, (divName, clickInfo) in enumerate(divInfo.items(), start=1):
             try:
-               field = wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, (divName if divName != "googleLogin" else "[jsname=\"LgbsSe\"]"))))
+               field = wait.until(when.element_to_be_clickable((by.CSS_SELECTOR,(divName if divName != "googleLogin" else "[jsname=\"LgbsSe\"]"))))
                time.sleep(clickInfo[1])
                if(clickInfo[2] == "click"):
                   field.click()
@@ -199,53 +211,58 @@ def login():
 
 def leave_check():
     while endTime - datetime.now() > timedelta(seconds=0):
-        while(not connect()):
-            driver.refresh()
-            time.sleep(1)
-        time.sleep(1)
-        while (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<p><b>429.</b> <ins>That\'s an error.</ins></p>') != 1):
-            try:
-                during_meet = None
-            except Exception:
-                (1+1==3)
-            time.sleep(1)
-            driver.get(meetingInfo[0])
-        while (((wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">Your meeting code has expired</div>') != 1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">There was a problem joining this video call</div>') != 1) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">You can\'t create a meeting yourself.') != 1 and not wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('your teacher to join and then refresh this page.</div>') != 1)) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("<div class=\"jtEd4b\">This call has ended</div>") != 1):
-            try:
-                during_meet = None
-            except Exception:
-                (1+1==3)
-            time.sleep(1)
-            driver.get(meetingInfo[0])
-            continue
-        while (((((wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">You can\'t create a meeting yourself.') != 1 and wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('your teacher to join and then refresh this page.</div>') != 1) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">This meeting hasn\'t started yet</div>') != 1) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">Someone has removed you from the meeting</div>') != 1 or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">The video call ended because the connection was lost</div>') != 1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">The video call ended because the computer went to sleep.</div>') != 1))) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("You can't join this video call</div>") != 1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("You aren't allowed to join this video call</div>") != 1)) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">Sorry, we encountered a problem joining this video call.') != 1):
-            try:
-                during_meet = None
-            except Exception:
-                (1+1==3)
-            time.sleep(1)
-            driver.refresh()    
-        while (find_element_by_css_selector("body").get_attribute("innerHTML")('<div jsname="r4nke" class="CRFCdf">You left the meeting</div>') != 1):
-            try:
-                during_meet = None
-            except Exception:
-                (1+1==3)
-            driver.refresh()
-            continue
         try:
-            try:
-                joinButton = wait.until(when.element_to_be_clickable((by.XPATH, joinButton1Path)))
-            except:
-                joinButton = wait.until(when.element_to_be_clickable((by.XPATH, joinButton2Path)))
-            if BROWSER_DRIVER.lower().startswith("chrome"):
+            while(not connect()):
+                driver.refresh()
                 time.sleep(1)
-            action.send_keys(Keys.ESCAPE).perform()
             time.sleep(1)
-            joinButton.click()
-            during_meet = Thread(target=duringMeet)
-            continue
+            while (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<p><b>429.</b> <ins>That\'s an error.</ins></p>') != -1):
+                try:
+                    during_meet = None
+                except Exception:
+                    (1+1==3)
+                time.sleep(1)
+                driver.get(meetingInfo[0])
+            while (((wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">Your meeting code has expired</div>') != -1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">There was a problem joining this video call</div>') != -1) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">You can\'t create a meeting yourself.') != -1 and not wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('your teacher to join and then refresh this page.</div>') != -1)) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("<div class=\"jtEd4b\">This call has ended</div>") != -1):
+                try:
+                    during_meet = None
+                except Exception:
+                    (1+1==3)
+                time.sleep(1)
+                driver.get(meetingInfo[0])
+                continue
+            while (((((wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">You can\'t create a meeting yourself.') != -1 and wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('your teacher to join and then refresh this page.</div>') != -1) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">This meeting hasn\'t started yet</div>') != -1) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">Someone has removed you from the meeting</div>') != -1 or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">The video call ended because the connection was lost</div>') != -1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">The video call ended because the computer went to sleep.</div>') != -1))) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("You can't join this video call</div>") != -1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("You aren't allowed to join this video call</div>") != -1)) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">Sorry, we encountered a problem joining this video call.') != -1):
+                try:
+                    during_meet = None
+                except Exception:
+                    (1+1==3)
+                time.sleep(1)
+                driver.refresh()    
+            while (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">You left the meeting</div>') != -1):
+                try:
+                    during_meet = None
+                except Exception:
+                    (1+1==3)
+                driver.refresh()
+                continue
+            try:
+                try:
+                    joinButton = wait.until(when.element_to_be_clickable((by.XPATH, joinButton1Path)))
+                except:
+                    joinButton = wait.until(when.element_to_be_clickable((by.XPATH, joinButton2Path)))
+                if BROWSER_DRIVER.lower().startswith("chrome"):
+                    time.sleep(1)
+                action.send_keys(Keys.ESCAPE).perform()
+                time.sleep(1)
+                joinButton.click()
+                during_meet = threading.Thread(target=duringMeet)
+                print("\n Thread Started")
+                during_meet.start()
+                continue
+            except Exception as err:
+                #print(err)
+                continue
         except Exception as err:
-            #print(err)
             continue
         
 
@@ -255,31 +272,34 @@ def attendMeet():
 
     print(colored(" Success!", "green"))
     print(f"Entering Google Meet #{meetIndex}...", end="")
-    while True:
+    while endTime - datetime.now() > timedelta(seconds=0):
         while (not connect()):
             driver.refresh()
             time.sleep(1)
         time.sleep(1)
-        while (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<p><b>429.</b> <ins>That\'s an error.</ins></p>') != 1):
+        while (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<p><b>429.</b> <ins>That\'s an error.</ins></p>') != -1):
             try:
                 during_meet = None
             except Exception:
                 (1+1==3)
             time.sleep(1)
+            # print("429 Error")
             driver.get(meetingInfo[0])
-        while (((wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">Your meeting code has expired</div>') != 1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">There was a problem joining this video call</div>') != 1) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">You can\'t create a meeting yourself.') != 1 and not wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('your teacher to join and then refresh this page.</div>') != 1)) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("<div class=\"jtEd4b\">This call has ended</div>") != 1):
+        while (((wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">Your meeting code has expired</div>') != -1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">There was a problem joining this video call</div>') != -1) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">You can\'t create a meeting yourself.') != -1 and not wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('your teacher to join and then refresh this page.</div>') != -1)) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("<div class=\"jtEd4b\">This call has ended</div>") != -1):
             try:
                 during_meet = None
             except Exception:
                 (1+1==3)
             time.sleep(1)
+            # print("Expired Meeting")
             driver.get(meetingInfo[0])
-        while (((((wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">You can\'t create a meeting yourself.') != 1 and wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('your teacher to join and then refresh this page.</div>') != 1) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">This meeting hasn\'t started yet</div>') != 1) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">Someone has removed you from the meeting</div>') != 1 or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">The video call ended because the connection was lost</div>') != 1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">The video call ended because the computer went to sleep.</div>') != 1))) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("You can't join this video call</div>") != 1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("You aren't allowed to join this video call</div>") != 1)) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">Sorry, we encountered a problem joining this video call.') != 1):
+        while (((((wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">You can\'t create a meeting yourself.') != -1 and wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('your teacher to join and then refresh this page.</div>') != -1) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">This meeting hasn\'t started yet</div>') != -1) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">Someone has removed you from the meeting</div>') != -1 or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">The video call ended because the connection was lost</div>') != -1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div jsname="r4nke" class="CRFCdf">The video call ended because the computer went to sleep.</div>') != -1))) or (wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("You can't join this video call</div>") != -1 or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find("You aren't allowed to join this video call</div>") != -1)) or wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, "body"))).get_attribute("innerHTML").find('<div class="jtEd4b">Sorry, we encountered a problem joining this video call.') != -1):
             try:
                 during_meet = None
             except Exception:
                 (1+1==3)
             time.sleep(1)
+            # print("Meeting not yet created/started")
             driver.refresh()
         try:
             joinButton = wait.until(when.element_to_be_clickable((by.XPATH, joinButton1Path)))
@@ -290,8 +310,10 @@ def attendMeet():
             action.send_keys(Keys.ESCAPE).perform()
         time.sleep(1)
         joinButton.click()
-        leave_checker = Thread(target=leave_check)
+        leave_checker = threading.Thread(target=leave_check)
         leave_checker.start()
+        during_meet = threading.Thread(target=duringMeet)
+        during_meet.start()
         break
 
     print(colored(" Success!", "green"))
@@ -311,12 +333,93 @@ def endMeet():
         during_meet = None
     except Exception:
         (1+1==3)
-    endButton = driver.find_element_by_css_selector(endButtonPath)
-    endButton.click()
+    try:
+        endButton = driver.find_element_by_css_selector(endButtonPath)
+        endButton.click()
+    except Exception:
+        (1+1==3)
+    time.sleep(1)
+    driver.get("https://meet.google.com/")
     print(colored(f"\nSuccessfully ended Google Meet #{meetIndex} @{timeStamp()}\n", "red"), end="")
 
+def sendMessage(message):
+    print(colored("Sending Message.... ", "yellow"), end="")
+    if(endTime - datetime.now() > timedelta(seconds=0)):
+        wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, '[aria-label="Chat with everyone"]'))).click()
+        time.sleep(1)
+        wait.until(when.element_to_be_clickable((by.CSS_SELECTOR, 'textarea'))).send_keys(str(message))
+        driver.execute_script('document.querySelector(\'div[data-tooltip="Send message"]\').removeAttribute("disabled");')
+        driver.execute_script('document.querySelector(\'div[data-tooltip="Send message"]\').removeAttribute("aria-disabled");')
+        driver.execute_script('document.querySelector(\'div[data-tooltip="Send message"]\').click();')
+        driver.find_element_by_css_selector('[aria-label="Close"]').click()
+        print(colored(" Sent!", "green"))
+    else:
+        print(colored(" Past time.", "red"))
+
 def duringMeet():
-    (1+1==3)
+    print("\nRecording sequence initiated")
+    CHUNK = 1024
+    FORMAT = pyaudio.paInt16
+    CHANNELS = 2
+    RATE = 44100
+    RECORD_SECONDS = 5
+    try:
+        fileName = 10000
+        while (endTime - datetime.now() > timedelta(seconds=0)):
+            # Recording Audio
+            p = pyaudio.PyAudio()
+            WAVE_OUTPUT_FILENAME = "audio_"+str(fileName)+".wav"
+            stream = p.open(format=FORMAT,
+                            channels=CHANNELS,
+                            rate=RATE,
+                            input=True,
+                            frames_per_buffer=CHUNK)
+            print("\n* recording")
+            frames = []
+            for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+                data = stream.read(CHUNK)
+                frames.append(data)
+            print("\n* done recording")
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+            wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+            wf.setnchannels(CHANNELS)
+            wf.setsampwidth(p.get_sample_size(FORMAT))
+            wf.setframerate(RATE)
+            wf.writeframes(b''.join(frames))
+            wf.close()
+            try:
+                filename = WAVE_OUTPUT_FILENAME
+                r = sr.Recognizer()
+                with sr.AudioFile(filename) as source:
+                    audio_data = r.record(source)
+                    text = r.recognize_google(audio_data)
+                    print('I think they said: ' + text)
+                os.remove(WAVE_OUTPUT_FILENAME)
+                #In target_text give bunch of your name in different way
+                #output=[ "what response you want"]
+                for wordIndex, (jsonWords, responses) in enumerate(SPEECH_RESPONSES.items(), start=1):
+                    # print(jsonWords)
+                    target_text = json.loads(jsonWords)
+                    # print(target_text)
+                    choice = random.choice(responses)
+                    for target in target_text:
+                        # print(str(target))
+                        if (target.lower() in text.lower()):
+                            print(colored("Keyword detected!", "green"))
+                            print("The following keyword was detected: " + target)
+                            print("The folloing response will be generated: " + choice)
+                            sendMessage(choice)
+            except Exception as exception:
+                # traceback.print_exc()
+                continue
+
+            fileName+=1
+    except Exception as fatal_err:
+        print(colored("\nFatal error occured during execution.\nMore details can be found below: ", "red"))
+        traceback.print_exc()
+        print(colored("Please restart the application for further use. ", "red"))
 
 def genericError():
     # clrscr()
@@ -367,6 +470,7 @@ if __name__ == "__main__":
         driver = initBrowser()
         wait = webdriver.support.ui.WebDriverWait(driver, 7)
         action = ActionChains(driver)
+        meetNo = 1
         for meetIndex, (jsonTime, meetingInfo) in enumerate(MEETS.items(), start=1):
             startTime = datetime.strptime(jsonTime[0:24], "%Y-%m-%dT%H:%M:%S.%fZ")
             if (meetIndex <= 1):
@@ -384,12 +488,14 @@ if __name__ == "__main__":
                   print(colored(" Past time.","red"))
                   continue
             print(colored(" Started!", "green"))
-            if (meetIndex <= 1):
+            if (meetNo <= 1):
                 login()
             attendMeet()
-            current_check = thread.start_new_thread(leave_check)
+            time.sleep(0.5)
+            driver.refresh()
             pause.until(endTime)
             endMeet()
+            meetNo += 1
         print("\n\nAll Meets completed successfully.")
         # hibernate()
         # Uncomment above to hibernate after a 10 second countdown upon completion of all Meets (Ctrl + C to abort hibernation)
@@ -400,12 +506,13 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         # clrscr()
-        print("\n\nCTRL ^C\n\nThrew a wrench in the works.")
+        print("\n\nCTRL ^C\n")
+        print(colored("User interrupted execution of program.", "red"))
         print("Press Enter to exit.")
         input()
         print("\nCleaning up and exiting...", end="")
         driver.quit()
     except Exception as err:
-        # print(err)
+        print(err)
         # Uncomment above to display error traceback (use when reporting issues)
         genericError()
