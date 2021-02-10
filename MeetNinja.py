@@ -291,7 +291,7 @@ def leave_check():
                 time.sleep(1)
                 joinButton.click()
                 during_meet = KThread(target=duringMeet)
-                print("\n Thread Started")
+                # print("\n Thread Started")
                 during_meet.start()
                 continue
             except Exception as err:
