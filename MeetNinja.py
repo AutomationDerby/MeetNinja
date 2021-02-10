@@ -42,7 +42,7 @@ trace."""
   def localtrace(self, frame, why, arg):
     if self.killed:
       if why == 'line':
-        raise SystemExit()
+        raise Exception("This is normal - The thread was exited.")
     return self.localtrace
   def kill(self):
     self.killed = True
